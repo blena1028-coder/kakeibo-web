@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useState } from "react";
+import { useFormStatus } from "react-dom";
 import { Save, Trash2, X } from "lucide-react";
 import { deleteTransaction, saveTransaction } from "@/actions/transactions";
 import { todayInputValue } from "@/lib/date";
@@ -72,7 +73,10 @@ export function InputModal({ categories, memberNames, templates, householdId, ba
   }, [editTransaction, open, pickedTemplate]);
 
   useEffect(() => {
-    if (state.ok) setOpen(false);
+    if (!state.ok) return;
+    setDraft(emptyDraft());
+    setDeleteConfirmOpen(false);
+    setOpen(false);
   }, [setOpen, state.ok]);
 
   const title = editTransaction ? "履歴編集" : "入力";
@@ -202,23 +206,28 @@ export function InputModal({ categories, memberNames, templates, householdId, ba
           </fieldset>
 
           {errorText ? <p className="form-error">{errorText}</p> : null}
-
+          <div className="settings-action-row wide-field">
+            {editTransaction ? (
+              <button className="icon-text danger settings-delete" onClick={() => setDeleteConfirmOpen(true)} type="button">
+                <Trash2 aria-hidden size={18} />
+                削除
+              </button>
+            ) : null}
+            <TransactionSaveButton />
+          </div>
         </form>
-
-        <div className="settings-action-row">
-          {editTransaction ? (
-            <button className="icon-text danger settings-delete" onClick={() => setDeleteConfirmOpen(true)} type="button">
-              <Trash2 aria-hidden size={18} />
-              削除
-            </button>
-          ) : null}
-          <button className="icon-text primary settings-submit" form="transaction-form" type="submit">
-            <Save aria-hidden size={18} />
-            保存
-          </button>
-        </div>
       </section>
       )}
     </div>
+  );
+}
+
+function TransactionSaveButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button className="icon-text primary settings-submit" disabled={pending} type="submit">
+      <Save aria-hidden size={18} />
+      {pending ? "保存中" : "保存"}
+    </button>
   );
 }
