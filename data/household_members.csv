@@ -1,0 +1,9 @@
+id,household_id,user_id,display_name,role,created_at,updated_at
+member-a,household-main,A,oo,owner,2026-06-01T00:00:00.000Z,2026-06-11T00:00:05.931Z
+member-b,household-main,B,B,member,2026-06-01T00:00:00.000Z,2026-06-11T00:00:05.931Z
+member-tanaka-a,household-tanaka,A,田中A,owner,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z
+member-tanaka-b,household-tanaka,B,田中B,member,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z
+member-kobayashi-a,household-kobayashi,A,小林A,owner,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z
+member-kobayashi-b,household-kobayashi,B,小林B,member,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z
+member-test-a,household-test,A,テストA,owner,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z
+member-test-b,household-test,B,テストB,member,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z

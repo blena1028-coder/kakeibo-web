@@ -1,0 +1,16 @@
+id,household_id,name,icon,sort_order,created_at,updated_at
+cat-food,household-main,食費,utensils,10,2026-06-01T00:00:00.000Z,2026-06-01T00:00:00.000Z
+cat-daily,household-main,日用品,shopping-bag,20,2026-06-01T00:00:00.000Z,2026-06-01T00:00:00.000Z
+cat-utility,household-main,光熱費,zap,30,2026-06-01T00:00:00.000Z,2026-06-01T00:00:00.000Z
+cat-fun,household-main,娯楽,sparkles,40,2026-06-01T00:00:00.000Z,2026-06-01T00:00:00.000Z
+cat-81270850-15ff-4a10-80da-ce62b2f63032,household-main,赤ちゃん,tag,50,2026-06-10T23:02:46.199Z,2026-06-10T23:02:46.199Z
+cat-0c7cafab-3fc4-4425-9ca0-7a480eff5ac7,household-main,CatKeep,tag,60,2026-06-10T23:51:33.579Z,2026-06-10T23:51:33.579Z
+cat-tanaka-food,household-tanaka,食費,utensils,10,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z
+cat-tanaka-daily,household-tanaka,日用品,shopping-bag,20,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z
+cat-tanaka-utility,household-tanaka,光熱費,zap,30,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z
+cat-kobayashi-food,household-kobayashi,食費,utensils,10,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z
+cat-kobayashi-daily,household-kobayashi,日用品,shopping-bag,20,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z
+cat-kobayashi-utility,household-kobayashi,光熱費,zap,30,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z
+cat-test-food,household-test,食費,utensils,10,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z
+cat-test-daily,household-test,日用品,shopping-bag,20,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z
+cat-test-utility,household-test,光熱費,zap,30,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z

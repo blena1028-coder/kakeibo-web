@@ -1,0 +1,13 @@
+id,household_id,label,amount,category_id,memo,payer_ids,sort_order,created_at,updated_at
+tpl-grocery,household-main,スーパー,4000,cat-food,週末まとめ買い,"[""A"",""B""]",10,2026-06-01T00:00:00.000Z,2026-06-01T00:00:00.000Z
+tpl-daily,household-main,日用品,1500,cat-daily,消耗品,"[""A""]",20,2026-06-01T00:00:00.000Z,2026-06-01T00:00:00.000Z
+tpl-utility,household-main,光熱費,3000,cat-utility,請求分,"[""B""]",30,2026-06-01T00:00:00.000Z,2026-06-01T00:00:00.000Z
+tpl-4ed42a50-c52b-4342-8338-1143cfbd712c,household-main,オムツ,0,cat-81270850-15ff-4a10-80da-ce62b2f63032,,"[""A"",""B""]",40,2026-06-10T23:02:34.518Z,2026-06-10T23:02:59.324Z
+tpl-07c500ec-6787-4238-95d6-16672bdcd5a3,household-main,TplKeepEdited,777,,memo edited and kept,"[""A"",""B""]",50,2026-06-10T23:37:10.499Z,2026-06-10T23:42:01.090Z
+tpl-0b3e16e9-8b9d-4927-bd29-b08f0e3154d4,household-main,TplAllEdit,888,,memoAll,"[""A"",""B""]",60,2026-06-10T23:52:34.010Z,2026-06-10T23:52:45.987Z
+tpl-tanaka-food,household-tanaka,スーパー,4000,cat-tanaka-food,週末まとめ買い,"[""A"",""B""]",10,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z
+tpl-tanaka-utility,household-tanaka,光熱費,3000,cat-tanaka-utility,請求分,"[""A"",""B""]",20,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z
+tpl-kobayashi-food,household-kobayashi,スーパー,4000,cat-kobayashi-food,週末まとめ買い,"[""A"",""B""]",10,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z
+tpl-kobayashi-utility,household-kobayashi,光熱費,3000,cat-kobayashi-utility,請求分,"[""A"",""B""]",20,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z
+tpl-test-food,household-test,スーパー,4000,cat-test-food,週末まとめ買い,"[""A"",""B""]",10,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z
+tpl-test-utility,household-test,光熱費,3000,cat-test-utility,請求分,"[""A"",""B""]",20,2026-06-12T00:00:00.000Z,2026-06-12T00:00:00.000Z
