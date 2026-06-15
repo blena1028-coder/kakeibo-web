@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createId } from "@/lib/ids";
 import { readTransactions, writeTransactions } from "@/lib/csv";
 import { defaultHouseholdId } from "@/lib/households";
@@ -59,14 +58,17 @@ export async function saveTransaction(
   return { ok: true, message: existing ? "履歴を更新しました" : "支出を保存しました" };
 }
 
-export async function deleteTransaction(formData: FormData) {
+export async function deleteTransaction(
+  _previousState: TransactionFormState,
+  formData: FormData
+): Promise<TransactionFormState> {
   const id = String(formData.get("id") ?? "");
-  if (!id) return;
+  if (!id) return { ok: false, message: "削除対象が見つかりません" };
   const { householdId, basePath } = actionScope(formData);
 
   const transactions = await readTransactions(householdId);
   await writeTransactions(transactions.filter((tx) => tx.id !== id), householdId);
 
   revalidateScoped(basePath);
-  redirect(`${basePath}/history`);
+  return { ok: true, message: "削除しました。" };
 }

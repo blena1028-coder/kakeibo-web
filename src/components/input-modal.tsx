@@ -45,9 +45,11 @@ function emptyDraft(): Draft {
 
 export function InputModal({ categories, memberNames, templates, householdId, basePath, open, setOpen, onSaved, editTransaction, pickedTemplate }: Props) {
   const [state, formAction] = useActionState(saveTransaction, initialState);
+  const [deleteState, deleteAction] = useActionState(deleteTransaction, initialState);
   const [draft, setDraft] = useState<Draft>(() => emptyDraft());
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const handledSuccessState = useRef<TransactionFormState | null>(null);
+  const handledDeleteState = useRef<TransactionFormState | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -82,6 +84,15 @@ export function InputModal({ categories, memberNames, templates, householdId, ba
     setOpen(false);
     onSaved?.("保存しました。");
   }, [onSaved, setOpen, state.message, state.ok]);
+
+  useEffect(() => {
+    if (!deleteState.ok || !deleteState.message || handledDeleteState.current === deleteState) return;
+    handledDeleteState.current = deleteState;
+    setDraft(emptyDraft());
+    setDeleteConfirmOpen(false);
+    setOpen(false);
+    onSaved?.("削除しました。");
+  }, [deleteState, onSaved, setOpen]);
 
   const title = editTransaction ? "履歴編集" : "入力";
   const errorText = useMemo(() => Object.values(state.errors ?? {}).join(" / "), [state.errors]);
@@ -123,16 +134,13 @@ export function InputModal({ categories, memberNames, templates, householdId, ba
               <X aria-hidden size={20} />
             </button>
           </header>
-          <form action={deleteTransaction} className="settings-form">
+          <form action={deleteAction} className="settings-form">
             <input name="id" type="hidden" value={editTransaction.id} />
             <input name="household_id" type="hidden" value={householdId} />
             <input name="base_path" type="hidden" value={basePath} />
             <p className="warning-text">この履歴を削除します。元に戻せません。</p>
             <div className="settings-action-row">
-              <button className="icon-text danger settings-delete" type="submit">
-                <Trash2 aria-hidden size={18} />
-                はい
-              </button>
+              <DeleteConfirmButton />
               <button className="icon-text primary settings-submit" onClick={() => setDeleteConfirmOpen(false)} type="button">
                 いいえ
               </button>
@@ -232,6 +240,16 @@ function TransactionSaveButton() {
     <button className="icon-text primary settings-submit" disabled={pending} type="submit">
       <Save aria-hidden size={18} />
       {pending ? "保存中" : "保存"}
+    </button>
+  );
+}
+
+function DeleteConfirmButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button className="icon-text danger settings-delete" disabled={pending} type="submit">
+      <Trash2 aria-hidden size={18} />
+      {pending ? "削除中" : "はい"}
     </button>
   );
 }

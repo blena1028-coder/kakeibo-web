@@ -873,3 +873,60 @@ h2 {
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-height: 760px) and (max-width: 520px) {
+  .modal-sheet {
+    max-height: 96dvh;
+    padding: 12px;
+  }
+
+  .modal-header {
+    gap: 8px;
+  }
+
+  .modal-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .template-strip {
+    gap: 6px;
+    padding: 8px 0;
+  }
+
+  .template-strip button {
+    padding: 7px 11px;
+  }
+
+  .form-grid {
+    gap: 8px 10px;
+  }
+
+  .form-grid label,
+  .wide-field,
+  .payer-field {
+    gap: 5px;
+  }
+
+  .form-grid label span,
+  .payer-field legend {
+    font-size: 0.78rem;
+  }
+
+  .form-grid input,
+  .form-grid select,
+  .form-grid textarea {
+    padding: 9px 10px;
+  }
+
+  .form-grid textarea {
+    min-height: 78px;
+  }
+
+  .payer-chip {
+    min-height: 42px;
+  }
+
+  .icon-text {
+    min-height: 44px;
+  }
+}
