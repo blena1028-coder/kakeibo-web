@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { InputModal } from "@/components/input-modal";
 import { QuickTemplateGrid } from "@/components/quick-template-grid";
 import { TransactionList } from "@/components/transaction-list";
@@ -22,6 +22,13 @@ type Props = {
 export function HomeClient({ categories, memberNames, templates, transactions, settlement, householdId, basePath, householdTitle }: Props) {
   const [open, setOpen] = useState(false);
   const [pickedTemplate, setPickedTemplate] = useState<QuickTemplate | null>(null);
+  const [toast, setToast] = useState("");
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = window.setTimeout(() => setToast(""), 2600);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
 
   return (
     <main className="space-y-5">
@@ -30,8 +37,9 @@ export function HomeClient({ categories, memberNames, templates, transactions, s
           <p className="eyebrow">Kakeibo</p>
           <h1>{householdTitle}</h1>
         </div>
-        <button className="round-button" aria-label="入力" onClick={() => setOpen(true)} type="button">
-          <Plus aria-hidden size={24} />
+        <button className="entry-button" onClick={() => setOpen(true)} type="button">
+          <Plus aria-hidden size={20} />
+          <span>支出登録</span>
         </button>
       </header>
 
@@ -78,12 +86,18 @@ export function HomeClient({ categories, memberNames, templates, transactions, s
         memberNames={memberNames}
         pickedTemplate={pickedTemplate}
         open={open}
+        onSaved={setToast}
         setOpen={(value) => {
           setOpen(value);
           if (!value) setPickedTemplate(null);
         }}
         templates={templates}
       />
+      {toast ? (
+        <div className="toast show" role="status">
+          {toast}
+        </div>
+      ) : null}
     </main>
   );
 }

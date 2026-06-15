@@ -25,6 +25,7 @@ type Props = {
   basePath: string;
   open: boolean;
   setOpen: (open: boolean) => void;
+  onSaved?: (message: string) => void;
   editTransaction?: Transaction | null;
   pickedTemplate?: QuickTemplate | null;
 };
@@ -42,7 +43,7 @@ function emptyDraft(): Draft {
   };
 }
 
-export function InputModal({ categories, memberNames, templates, householdId, basePath, open, setOpen, editTransaction, pickedTemplate }: Props) {
+export function InputModal({ categories, memberNames, templates, householdId, basePath, open, setOpen, onSaved, editTransaction, pickedTemplate }: Props) {
   const [state, formAction] = useActionState(saveTransaction, initialState);
   const [draft, setDraft] = useState<Draft>(() => emptyDraft());
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -77,7 +78,8 @@ export function InputModal({ categories, memberNames, templates, householdId, ba
     setDraft(emptyDraft());
     setDeleteConfirmOpen(false);
     setOpen(false);
-  }, [setOpen, state.ok]);
+    onSaved?.("保存しました。");
+  }, [onSaved, setOpen, state.ok]);
 
   const title = editTransaction ? "履歴編集" : "入力";
   const errorText = useMemo(() => Object.values(state.errors ?? {}).join(" / "), [state.errors]);

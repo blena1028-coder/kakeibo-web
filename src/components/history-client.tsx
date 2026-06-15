@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { InputModal } from "@/components/input-modal";
 import { formatShortDate, formatYen } from "@/lib/date";
 import { memberName, payerNames } from "@/lib/members";
@@ -19,6 +19,7 @@ export function HistoryClient({ transactions, categories, templates, memberNames
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [selectedMonth, setSelectedMonth] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [toast, setToast] = useState("");
   const categoryName = (id: string) => categories.find((category) => category.id === id)?.name ?? "未分類";
   const months = Array.from(new Set(transactions.map((tx) => tx.date.slice(0, 7)))).sort((a, b) => b.localeCompare(a));
   const filteredTransactions = transactions.filter((tx) => {
@@ -26,6 +27,12 @@ export function HistoryClient({ transactions, categories, templates, memberNames
     const categoryMatches = selectedCategory === "all" || tx.category_id === selectedCategory;
     return monthMatches && categoryMatches;
   });
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = window.setTimeout(() => setToast(""), 2600);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
 
   return (
     <main className="space-y-5">
@@ -69,12 +76,18 @@ export function HistoryClient({ transactions, categories, templates, memberNames
         basePath={basePath}
         editTransaction={editing}
         memberNames={memberNames}
+        onSaved={setToast}
         open={Boolean(editing)}
         setOpen={(value) => {
           if (!value) setEditing(null);
         }}
         templates={templates}
       />
+      {toast ? (
+        <div className="toast show" role="status">
+          {toast}
+        </div>
+      ) : null}
     </main>
   );
 }

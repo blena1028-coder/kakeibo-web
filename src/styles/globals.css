@@ -89,6 +89,7 @@ h2 {
 }
 
 .round-button,
+.entry-button,
 .icon-button {
   display: inline-flex;
   align-items: center;
@@ -104,6 +105,20 @@ h2 {
   background: #e1785f;
   color: white;
   box-shadow: 0 12px 24px rgba(225, 120, 95, 0.3);
+}
+
+.entry-button {
+  min-height: 52px;
+  flex: 0 0 auto;
+  gap: 8px;
+  border-radius: 999px;
+  background: #e1785f;
+  color: white;
+  box-shadow: 0 12px 24px rgba(225, 120, 95, 0.3);
+  padding: 0 18px;
+  font-size: 0.95rem;
+  font-weight: 900;
+  white-space: nowrap;
 }
 
 .icon-button {
