@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Save, Trash2, X } from "lucide-react";
 import { deleteTransaction, saveTransaction } from "@/actions/transactions";
@@ -47,6 +47,7 @@ export function InputModal({ categories, memberNames, templates, householdId, ba
   const [state, formAction] = useActionState(saveTransaction, initialState);
   const [draft, setDraft] = useState<Draft>(() => emptyDraft());
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const handledSuccessState = useRef<TransactionFormState | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -74,12 +75,13 @@ export function InputModal({ categories, memberNames, templates, householdId, ba
   }, [editTransaction, open, pickedTemplate]);
 
   useEffect(() => {
-    if (!state.ok) return;
+    if (!state.ok || !state.message || handledSuccessState.current === state) return;
+    handledSuccessState.current = state;
     setDraft(emptyDraft());
     setDeleteConfirmOpen(false);
     setOpen(false);
     onSaved?.("保存しました。");
-  }, [onSaved, setOpen, state.ok]);
+  }, [onSaved, setOpen, state.message, state.ok]);
 
   const title = editTransaction ? "履歴編集" : "入力";
   const errorText = useMemo(() => Object.values(state.errors ?? {}).join(" / "), [state.errors]);
