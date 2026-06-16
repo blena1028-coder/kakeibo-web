@@ -453,6 +453,66 @@ h2 {
   font-weight: 800;
 }
 
+.sortable-item,
+.sortable-template {
+  flex: 0 0 auto;
+}
+
+.sortable-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sortable-template {
+  width: 148px;
+  display: grid;
+  gap: 6px;
+}
+
+.sort-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.sort-nudge {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(23, 32, 27, 0.1);
+  border-radius: 999px;
+  background: white;
+  color: #17201b;
+}
+
+.sortable-template .sort-nudge {
+  width: 100%;
+}
+
+.sort-nudge:disabled {
+  opacity: 0.35;
+}
+
+.sort-save-form {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.sort-save-button {
+  min-height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: #eef4ef;
+  color: #17201b;
+  padding: 0 14px;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
 .mini-row span {
   min-width: 0;
 }

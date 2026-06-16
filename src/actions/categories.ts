@@ -83,6 +83,27 @@ export async function updateCategories(
   return { ok: true, message: "保存しました。" };
 }
 
+export async function reorderCategories(
+  _previousState: SettingsActionState,
+  formData: FormData
+): Promise<SettingsActionState> {
+  const orderedIds = formData.getAll("category_order").map(String);
+  const { householdId, basePath } = actionScope(formData);
+  const categories = await readCategories(householdId);
+  const now = new Date().toISOString();
+  const orderMap = new Map(orderedIds.map((id, index) => [id, (index + 1) * 10]));
+  const reorderedCategories = categories.map((category) => ({
+    ...category,
+    sort_order: orderMap.get(category.id) ?? category.sort_order,
+    updated_at: orderMap.has(category.id) ? now : category.updated_at
+  }));
+
+  await writeCategories(reorderedCategories, householdId);
+  revalidateScoped(basePath);
+
+  return { ok: true, message: "並べ替えました。" };
+}
+
 export async function deleteCategory(
   _previousState: SettingsActionState,
   formData: FormData

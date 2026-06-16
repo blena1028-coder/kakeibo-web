@@ -104,6 +104,27 @@ export async function updateQuickTemplates(
   return { ok: true, message: "保存しました。" };
 }
 
+export async function reorderQuickTemplates(
+  _previousState: SettingsActionState,
+  formData: FormData
+): Promise<SettingsActionState> {
+  const orderedIds = formData.getAll("template_order").map(String);
+  const { householdId, basePath } = actionScope(formData);
+  const templates = await readQuickTemplates(householdId);
+  const now = new Date().toISOString();
+  const orderMap = new Map(orderedIds.map((id, index) => [id, (index + 1) * 10]));
+  const reorderedTemplates = templates.map((template) => ({
+    ...template,
+    sort_order: orderMap.get(template.id) ?? template.sort_order,
+    updated_at: orderMap.has(template.id) ? now : template.updated_at
+  }));
+
+  await writeQuickTemplates(reorderedTemplates, householdId);
+  revalidateScoped(basePath);
+
+  return { ok: true, message: "並べ替えました。" };
+}
+
 export async function deleteQuickTemplate(
   _previousState: SettingsActionState,
   formData: FormData

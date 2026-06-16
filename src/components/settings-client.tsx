@@ -1,11 +1,11 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useState } from "react";
-import { Pencil, Plus, Save, Trash2, X } from "lucide-react";
-import { deleteCategory, updateCategories } from "@/actions/categories";
+import { ChevronLeft, ChevronRight, Pencil, Plus, Save, Trash2, X } from "lucide-react";
+import { deleteCategory, reorderCategories, updateCategories } from "@/actions/categories";
 import { updateHouseholdName } from "@/actions/households";
 import { updateMemberNames } from "@/actions/members";
-import { deleteQuickTemplate, updateQuickTemplates } from "@/actions/quick-templates";
+import { deleteQuickTemplate, reorderQuickTemplates, updateQuickTemplates } from "@/actions/quick-templates";
 import { formatYen } from "@/lib/date";
 import { memberName } from "@/lib/members";
 import type { Category, MemberId, MemberNameMap, QuickTemplate, SettingsActionState } from "@/lib/types";
@@ -29,21 +29,28 @@ export function SettingsClient({ categories, categoryUsage, memberNames, templat
   const [householdState, householdAction] = useActionState(updateHouseholdName, initialState);
   const [memberState, memberAction] = useActionState(updateMemberNames, initialState);
   const [categoryState, categoryAction] = useActionState(updateCategories, initialState);
+  const [categoryOrderState, categoryOrderAction] = useActionState(reorderCategories, initialState);
   const [categoryDeleteState, categoryDeleteAction] = useActionState(deleteCategory, initialState);
   const [templateState, templateAction] = useActionState(updateQuickTemplates, initialState);
+  const [templateOrderState, templateOrderAction] = useActionState(reorderQuickTemplates, initialState);
   const [templateDeleteState, templateDeleteAction] = useActionState(deleteQuickTemplate, initialState);
   const [toast, setToast] = useState<SettingsActionState>(initialState);
   const [householdEditorOpen, setHouseholdEditorOpen] = useState(false);
   const [memberEditorOpen, setMemberEditorOpen] = useState(false);
   const [categoryEditor, setCategoryEditor] = useState<CategoryEditor>(null);
+  const [categoryOrder, setCategoryOrder] = useState(categories);
   const [categoryDeleteTarget, setCategoryDeleteTarget] = useState<Category | null>(null);
   const [categoryDangerConfirmOpen, setCategoryDangerConfirmOpen] = useState(false);
   const [templateEditor, setTemplateEditor] = useState<TemplateEditor>(null);
+  const [templateOrder, setTemplateOrder] = useState(templates);
   const [templateDeleteTarget, setTemplateDeleteTarget] = useState<QuickTemplate | null>(null);
   const latestState = useMemo(
-    () => [householdState, memberState, categoryState, categoryDeleteState, templateState, templateDeleteState].findLast((state) => state.message),
-    [householdState, memberState, categoryState, categoryDeleteState, templateState, templateDeleteState]
+    () => [householdState, memberState, categoryState, categoryOrderState, categoryDeleteState, templateState, templateOrderState, templateDeleteState].findLast((state) => state.message),
+    [householdState, memberState, categoryState, categoryOrderState, categoryDeleteState, templateState, templateOrderState, templateDeleteState]
   );
+
+  useEffect(() => setCategoryOrder(categories), [categories]);
+  useEffect(() => setTemplateOrder(templates), [templates]);
 
   useEffect(() => {
     if (!latestState?.message) return;
@@ -96,12 +103,28 @@ export function SettingsClient({ categories, categoryUsage, memberNames, templat
           </button>
         </div>
         <div className="settings-chip-scroll">
-          {categories.map((category) => (
-            <button className="category-pill" key={category.id} onClick={() => setCategoryEditor(category)} type="button">
-              {category.name}
-            </button>
+          {categoryOrder.map((category, index) => (
+            <div className="sortable-item" key={category.id}>
+              <button className="sort-nudge" aria-label={`${category.name}を左へ移動`} disabled={index === 0} onClick={() => setCategoryOrder(moveItem(categoryOrder, index, index - 1))} type="button">
+                <ChevronLeft aria-hidden size={16} />
+              </button>
+              <button className="category-pill" onClick={() => setCategoryEditor(category)} type="button">
+                {category.name}
+              </button>
+              <button className="sort-nudge" aria-label={`${category.name}を右へ移動`} disabled={index === categoryOrder.length - 1} onClick={() => setCategoryOrder(moveItem(categoryOrder, index, index + 1))} type="button">
+                <ChevronRight aria-hidden size={16} />
+              </button>
+            </div>
           ))}
         </div>
+        <form action={categoryOrderAction} className="sort-save-form">
+          <input name="household_id" type="hidden" value={householdId} />
+          <input name="base_path" type="hidden" value={basePath} />
+          {categoryOrder.map((category) => (
+            <input key={category.id} name="category_order" type="hidden" value={category.id} />
+          ))}
+          <button className="sort-save-button" type="submit">並び順を保存</button>
+        </form>
       </section>
 
       <section className="panel compact-panel">
@@ -112,14 +135,32 @@ export function SettingsClient({ categories, categoryUsage, memberNames, templat
           </button>
         </div>
         <div className="template-card-scroll">
-          {templates.map((template) => (
-            <button className="template-summary-card" key={template.id} onClick={() => setTemplateEditor(template)} type="button">
-              <strong>{template.label}</strong>
-              <small>{template.amount > 0 ? formatYen(template.amount) : "金額なし"}</small>
-              <span>{template.memo || "内容なし"}</span>
-            </button>
+          {templateOrder.map((template, index) => (
+            <div className="sortable-template" key={template.id}>
+              <div className="sort-controls">
+                <button className="sort-nudge" aria-label={`${template.label}を左へ移動`} disabled={index === 0} onClick={() => setTemplateOrder(moveItem(templateOrder, index, index - 1))} type="button">
+                  <ChevronLeft aria-hidden size={16} />
+                </button>
+                <button className="sort-nudge" aria-label={`${template.label}を右へ移動`} disabled={index === templateOrder.length - 1} onClick={() => setTemplateOrder(moveItem(templateOrder, index, index + 1))} type="button">
+                  <ChevronRight aria-hidden size={16} />
+                </button>
+              </div>
+              <button className="template-summary-card" onClick={() => setTemplateEditor(template)} type="button">
+                <strong>{template.label}</strong>
+                <small>{template.amount > 0 ? formatYen(template.amount) : "金額なし"}</small>
+                <span>{template.memo || "内容なし"}</span>
+              </button>
+            </div>
           ))}
         </div>
+        <form action={templateOrderAction} className="sort-save-form">
+          <input name="household_id" type="hidden" value={householdId} />
+          <input name="base_path" type="hidden" value={basePath} />
+          {templateOrder.map((template) => (
+            <input key={template.id} name="template_order" type="hidden" value={template.id} />
+          ))}
+          <button className="sort-save-button" type="submit">並び順を保存</button>
+        </form>
       </section>
 
       {householdEditorOpen ? (
@@ -388,6 +429,14 @@ function limitNumberInput(event: React.FormEvent<HTMLInputElement>, maxDigits: n
   const target = event.currentTarget;
   const digits = target.value.replace(/\D/g, "").slice(0, maxDigits);
   if (target.value !== digits) target.value = digits;
+}
+
+function moveItem<T>(items: T[], from: number, to: number) {
+  if (to < 0 || to >= items.length) return items;
+  const next = [...items];
+  const [item] = next.splice(from, 1);
+  next.splice(to, 0, item);
+  return next;
 }
 
 function SettingsModal({
