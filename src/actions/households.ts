@@ -46,7 +46,9 @@ function createHouseholdUrlId(existingIds: Set<string>) {
 
 export async function createHousehold(formData: FormData) {
   const name = String(formData.get("household_name") ?? "").trim().slice(0, 20);
-  if (!name) redirect("/deploy?error=name");
+  const memberA = String(formData.get("member_A") ?? "").trim().slice(0, 20);
+  const memberB = String(formData.get("member_B") ?? "").trim().slice(0, 20);
+  if (!name || !memberA || !memberB) redirect("/deploy?error=required");
 
   const now = new Date().toISOString();
   const households = await readHouseholds();
@@ -69,7 +71,7 @@ export async function createHousehold(formData: FormData) {
       id: `member-${id}-a`,
       household_id: id,
       user_id: "A",
-      display_name: "A",
+      display_name: memberA,
       role: "owner",
       created_at: now,
       updated_at: now
@@ -78,7 +80,7 @@ export async function createHousehold(formData: FormData) {
       id: `member-${id}-b`,
       household_id: id,
       user_id: "B",
-      display_name: "B",
+      display_name: memberB,
       role: "member",
       created_at: now,
       updated_at: now

@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
-import { GripVertical, Pencil, Plus, Save, Trash2, X } from "lucide-react";
+import { Check, Copy, GripVertical, Pencil, Plus, Save, Trash2, X } from "lucide-react";
 import { deleteCategory, reorderCategories, updateCategories } from "@/actions/categories";
 import { updateHouseholdName } from "@/actions/households";
 import { updateMemberNames } from "@/actions/members";
@@ -49,6 +49,7 @@ export function SettingsClient({ categories, categoryUsage, memberNames, templat
   const [templateDeleteTarget, setTemplateDeleteTarget] = useState<QuickTemplate | null>(null);
   const [orderEditor, setOrderEditor] = useState<OrderEditor>(null);
   const [publicUrl, setPublicUrl] = useState(basePath || "/");
+  const [urlCopied, setUrlCopied] = useState(false);
   const categoryRowRefs = useRef(new Map<string, HTMLDivElement>());
   const templateRowRefs = useRef(new Map<string, HTMLDivElement>());
   const handledActionStates = useRef(new WeakSet<SettingsActionState>());
@@ -60,6 +61,11 @@ export function SettingsClient({ categories, categoryUsage, memberNames, templat
   useEffect(() => setCategoryOrder(categories), [categories]);
   useEffect(() => setTemplateOrder(templates), [templates]);
   useEffect(() => setPublicUrl(`${window.location.origin}${basePath || "/"}`), [basePath]);
+  useEffect(() => {
+    if (!urlCopied) return;
+    const timer = window.setTimeout(() => setUrlCopied(false), 1800);
+    return () => window.clearTimeout(timer);
+  }, [urlCopied]);
 
   useEffect(() => {
     const latestState = actionStates.findLast((state) => state.message && !handledActionStates.current.has(state));
@@ -100,9 +106,18 @@ export function SettingsClient({ categories, categoryUsage, memberNames, templat
         <div className="settings-heading">
           <h2>領域URL</h2>
         </div>
-        <div className="settings-url-box">
+        <div className="settings-url-row">
+          <div className="settings-url-box">
           <code>{publicUrl}</code>
+          </div>
+          <button className="tiny-icon-button" aria-label="領域URLをコピー" onClick={async () => {
+            const copied = await copyText(publicUrl);
+            if (copied) setUrlCopied(true);
+          }} type="button">
+            {urlCopied ? <Check aria-hidden size={18} /> : <Copy aria-hidden size={18} />}
+          </button>
         </div>
+        {urlCopied ? <p className="copy-status">コピー済み</p> : null}
       </section>
 
       <section className="panel compact-panel">
@@ -515,6 +530,28 @@ function limitNumberInput(event: React.FormEvent<HTMLInputElement>, maxDigits: n
   const target = event.currentTarget;
   const digits = target.value.replace(/\D/g, "").slice(0, maxDigits);
   if (target.value !== digits) target.value = digits;
+}
+
+async function copyText(text: string) {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // Fall back below for non-secure HTTP contexts.
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.select();
+  const copied = document.execCommand("copy");
+  document.body.removeChild(textarea);
+  return copied;
 }
 
 function setRowRef(refs: Map<string, HTMLDivElement>, id: string, node: HTMLDivElement | null) {

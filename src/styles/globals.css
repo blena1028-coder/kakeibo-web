@@ -210,6 +210,7 @@ h2 {
 .deploy-page {
   min-height: calc(100vh - 44px);
   display: grid;
+  gap: 16px;
   align-items: center;
 }
 
@@ -433,6 +434,7 @@ h2 {
 }
 
 .settings-url-box {
+  min-width: 0;
   overflow-x: auto;
   border: 1px solid rgba(23, 32, 27, 0.08);
   border-radius: 8px;
@@ -445,6 +447,45 @@ h2 {
   font-size: 0.88rem;
   font-weight: 900;
   white-space: nowrap;
+}
+
+.settings-url-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.copy-status {
+  color: #496f5d;
+  font-size: 0.82rem;
+  font-weight: 900;
+  margin-top: 8px;
+}
+
+.admin-area-list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-area-row {
+  display: grid;
+  gap: 6px;
+  border: 1px solid rgba(23, 32, 27, 0.08);
+  border-radius: 8px;
+  background: #f8f7f2;
+  padding: 12px;
+}
+
+.admin-area-row strong,
+.admin-area-row code {
+  overflow-wrap: anywhere;
+}
+
+.admin-area-row code {
+  color: rgba(23, 32, 27, 0.68);
+  font-size: 0.84rem;
+  font-weight: 900;
 }
 
 .category-pill {
