@@ -20,7 +20,9 @@ export function householdSlugFromId(householdId = defaultHouseholdId) {
 
 export function householdBasePath(householdId = defaultHouseholdId) {
   const slug = householdSlugFromId(householdId);
-  return slug ? `/${slug}` : "";
+  if (slug) return `/${slug}`;
+  if (householdId && householdId !== defaultHouseholdId) return `/${householdId}`;
+  return "";
 }
 
 export function householdNameOrSlug(householdId: string, storedName?: string) {

@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { readHouseholds, writeHouseholds } from "@/lib/csv";
+import { redirect } from "next/navigation";
+import { readHouseholdMembers, readHouseholds, writeHouseholdMembers, writeHouseholds } from "@/lib/csv";
 import { defaultHouseholdId, scopedPath } from "@/lib/households";
 import type { SettingsActionState } from "@/lib/types";
 
@@ -33,4 +34,57 @@ export async function updateHouseholdName(_: SettingsActionState, formData: Form
   revalidatePath(scopedPath(basePath, "/"));
   revalidatePath(scopedPath(basePath, "/settings"));
   return { ok: true, message: "保存しました。" };
+}
+
+function createHouseholdUrlId(existingIds: Set<string>) {
+  for (let index = 0; index < 8; index += 1) {
+    const id = `hh-${crypto.randomUUID().replaceAll("-", "").slice(0, 12)}`;
+    if (!existingIds.has(id)) return id;
+  }
+  return `hh-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+}
+
+export async function createHousehold(formData: FormData) {
+  const name = String(formData.get("household_name") ?? "").trim().slice(0, 20);
+  if (!name) redirect("/deploy?error=name");
+
+  const now = new Date().toISOString();
+  const households = await readHouseholds();
+  const id = createHouseholdUrlId(new Set(households.map((household) => household.id)));
+
+  await writeHouseholds([
+    ...households,
+    {
+      id,
+      name,
+      created_at: now,
+      updated_at: now
+    }
+  ]);
+
+  const members = await readHouseholdMembers();
+  await writeHouseholdMembers([
+    ...members,
+    {
+      id: `member-${id}-a`,
+      household_id: id,
+      user_id: "A",
+      display_name: "A",
+      role: "owner",
+      created_at: now,
+      updated_at: now
+    },
+    {
+      id: `member-${id}-b`,
+      household_id: id,
+      user_id: "B",
+      display_name: "B",
+      role: "member",
+      created_at: now,
+      updated_at: now
+    }
+  ]);
+
+  revalidatePath(`/${id}`);
+  redirect(`/${id}`);
 }

@@ -48,6 +48,7 @@ export function SettingsClient({ categories, categoryUsage, memberNames, templat
   const [draggingTemplateId, setDraggingTemplateId] = useState("");
   const [templateDeleteTarget, setTemplateDeleteTarget] = useState<QuickTemplate | null>(null);
   const [orderEditor, setOrderEditor] = useState<OrderEditor>(null);
+  const [publicUrl, setPublicUrl] = useState(basePath || "/");
   const categoryRowRefs = useRef(new Map<string, HTMLDivElement>());
   const templateRowRefs = useRef(new Map<string, HTMLDivElement>());
   const handledActionStates = useRef(new WeakSet<SettingsActionState>());
@@ -58,6 +59,7 @@ export function SettingsClient({ categories, categoryUsage, memberNames, templat
 
   useEffect(() => setCategoryOrder(categories), [categories]);
   useEffect(() => setTemplateOrder(templates), [templates]);
+  useEffect(() => setPublicUrl(`${window.location.origin}${basePath || "/"}`), [basePath]);
 
   useEffect(() => {
     const latestState = actionStates.findLast((state) => state.message && !handledActionStates.current.has(state));
@@ -91,6 +93,15 @@ export function SettingsClient({ categories, categoryUsage, memberNames, templat
         </div>
         <div className="settings-chip-scroll">
           <span className="chip strong-chip">{householdName || "共有"}</span>
+        </div>
+      </section>
+
+      <section className="panel compact-panel">
+        <div className="settings-heading">
+          <h2>領域URL</h2>
+        </div>
+        <div className="settings-url-box">
+          <code>{publicUrl}</code>
         </div>
       </section>
 

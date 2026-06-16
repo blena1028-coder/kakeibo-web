@@ -14,12 +14,14 @@ const navItems = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const firstSegment = pathname.split("/").filter(Boolean)[0];
-  const staticSegments = new Set(["history", "analytics", "settings"]);
+  const staticSegments = new Set(["history", "analytics", "settings", "deploy"]);
+  const hideNav = firstSegment === "deploy";
   const basePath = firstSegment && !staticSegments.has(firstSegment) ? `/${firstSegment}` : "";
 
   return (
     <div className="app-shell">
       <div className="app-frame">{children}</div>
+      {hideNav ? null : (
       <nav className="bottom-nav" aria-label="メインナビゲーション">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -33,6 +35,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           );
         })}
       </nav>
+      )}
     </div>
   );
 }
