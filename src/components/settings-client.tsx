@@ -50,8 +50,9 @@ export function SettingsClient({ categories, categoryUsage, memberNames, templat
   const [orderEditor, setOrderEditor] = useState<OrderEditor>(null);
   const categoryRowRefs = useRef(new Map<string, HTMLDivElement>());
   const templateRowRefs = useRef(new Map<string, HTMLDivElement>());
-  const latestState = useMemo(
-    () => [householdState, memberState, categoryState, categoryOrderState, categoryDeleteState, templateState, templateOrderState, templateDeleteState].findLast((state) => state.message),
+  const handledActionStates = useRef(new WeakSet<SettingsActionState>());
+  const actionStates = useMemo(
+    () => [householdState, memberState, categoryState, categoryOrderState, categoryDeleteState, templateState, templateOrderState, templateDeleteState],
     [householdState, memberState, categoryState, categoryOrderState, categoryDeleteState, templateState, templateOrderState, templateDeleteState]
   );
 
@@ -59,7 +60,9 @@ export function SettingsClient({ categories, categoryUsage, memberNames, templat
   useEffect(() => setTemplateOrder(templates), [templates]);
 
   useEffect(() => {
-    if (!latestState?.message) return;
+    const latestState = actionStates.findLast((state) => state.message && !handledActionStates.current.has(state));
+    if (!latestState) return;
+    handledActionStates.current.add(latestState);
     setToast(latestState);
     if (latestState.ok) {
       setHouseholdEditorOpen(false);
@@ -75,7 +78,7 @@ export function SettingsClient({ categories, categoryUsage, memberNames, templat
     }
     const timer = window.setTimeout(() => setToast(initialState), 2600);
     return () => window.clearTimeout(timer);
-  }, [latestState]);
+  }, [actionStates]);
 
   return (
     <>
@@ -335,7 +338,14 @@ export function SettingsClient({ categories, categoryUsage, memberNames, templat
           setCategoryDeleteTarget(null);
           setCategoryDangerConfirmOpen(false);
         }}>
-          <form action={categoryDeleteAction} className="settings-form">
+          <form
+            action={categoryDeleteAction}
+            className="settings-form"
+            onSubmit={() => {
+              setCategoryDeleteTarget(null);
+              setCategoryDangerConfirmOpen(false);
+            }}
+          >
             <input name="category_id" type="hidden" value={categoryDeleteTarget.id} />
             <input name="household_id" type="hidden" value={householdId} />
             <input name="base_path" type="hidden" value={basePath} />
