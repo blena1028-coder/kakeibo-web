@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Pencil, Plus, Save, Trash2, X } from "lucide-react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { GripVertical, Pencil, Plus, Save, Trash2, X } from "lucide-react";
 import { deleteCategory, reorderCategories, updateCategories } from "@/actions/categories";
 import { updateHouseholdName } from "@/actions/households";
 import { updateMemberNames } from "@/actions/members";
@@ -22,6 +22,7 @@ type Props = {
 
 type CategoryEditor = Category | "new" | null;
 type TemplateEditor = QuickTemplate | "new" | null;
+type OrderEditor = "categories" | "templates" | null;
 
 const initialState: SettingsActionState = { ok: false, message: "" };
 
@@ -39,11 +40,16 @@ export function SettingsClient({ categories, categoryUsage, memberNames, templat
   const [memberEditorOpen, setMemberEditorOpen] = useState(false);
   const [categoryEditor, setCategoryEditor] = useState<CategoryEditor>(null);
   const [categoryOrder, setCategoryOrder] = useState(categories);
+  const [draggingCategoryId, setDraggingCategoryId] = useState("");
   const [categoryDeleteTarget, setCategoryDeleteTarget] = useState<Category | null>(null);
   const [categoryDangerConfirmOpen, setCategoryDangerConfirmOpen] = useState(false);
   const [templateEditor, setTemplateEditor] = useState<TemplateEditor>(null);
   const [templateOrder, setTemplateOrder] = useState(templates);
+  const [draggingTemplateId, setDraggingTemplateId] = useState("");
   const [templateDeleteTarget, setTemplateDeleteTarget] = useState<QuickTemplate | null>(null);
+  const [orderEditor, setOrderEditor] = useState<OrderEditor>(null);
+  const categoryRowRefs = useRef(new Map<string, HTMLDivElement>());
+  const templateRowRefs = useRef(new Map<string, HTMLDivElement>());
   const latestState = useMemo(
     () => [householdState, memberState, categoryState, categoryOrderState, categoryDeleteState, templateState, templateOrderState, templateDeleteState].findLast((state) => state.message),
     [householdState, memberState, categoryState, categoryOrderState, categoryDeleteState, templateState, templateOrderState, templateDeleteState]
@@ -63,6 +69,9 @@ export function SettingsClient({ categories, categoryUsage, memberNames, templat
       setCategoryDangerConfirmOpen(false);
       setTemplateEditor(null);
       setTemplateDeleteTarget(null);
+      setOrderEditor(null);
+      setDraggingCategoryId("");
+      setDraggingTemplateId("");
     }
     const timer = window.setTimeout(() => setToast(initialState), 2600);
     return () => window.clearTimeout(timer);
@@ -98,70 +107,126 @@ export function SettingsClient({ categories, categoryUsage, memberNames, templat
       <section className="panel compact-panel">
         <div className="settings-heading">
           <h2>カテゴリー</h2>
-          <button className="tiny-icon-button add" aria-label="カテゴリーを追加" onClick={() => setCategoryEditor("new")} type="button">
-            <Plus aria-hidden size={20} />
-          </button>
+          <div className="settings-heading-actions">
+            <button className="sort-open-button" onClick={() => setOrderEditor("categories")} type="button">並べ替え</button>
+            <button className="tiny-icon-button add" aria-label="カテゴリーを追加" onClick={() => setCategoryEditor("new")} type="button">
+              <Plus aria-hidden size={20} />
+            </button>
+          </div>
         </div>
         <div className="settings-chip-scroll">
-          {categoryOrder.map((category, index) => (
-            <div className="sortable-item" key={category.id}>
-              <button className="sort-nudge" aria-label={`${category.name}を左へ移動`} disabled={index === 0} onClick={() => setCategoryOrder(moveItem(categoryOrder, index, index - 1))} type="button">
-                <ChevronLeft aria-hidden size={16} />
-              </button>
-              <button className="category-pill" onClick={() => setCategoryEditor(category)} type="button">
-                {category.name}
-              </button>
-              <button className="sort-nudge" aria-label={`${category.name}を右へ移動`} disabled={index === categoryOrder.length - 1} onClick={() => setCategoryOrder(moveItem(categoryOrder, index, index + 1))} type="button">
-                <ChevronRight aria-hidden size={16} />
-              </button>
-            </div>
+          {categories.map((category) => (
+            <button className="category-pill" key={category.id} onClick={() => setCategoryEditor(category)} type="button">
+              {category.name}
+            </button>
           ))}
         </div>
-        <form action={categoryOrderAction} className="sort-save-form">
-          <input name="household_id" type="hidden" value={householdId} />
-          <input name="base_path" type="hidden" value={basePath} />
-          {categoryOrder.map((category) => (
-            <input key={category.id} name="category_order" type="hidden" value={category.id} />
-          ))}
-          <button className="sort-save-button" type="submit">並び順を保存</button>
-        </form>
       </section>
 
       <section className="panel compact-panel">
         <div className="settings-heading">
           <h2>よく使う入力(ショートカット)</h2>
-          <button className="tiny-icon-button add" aria-label="よく使う入力(ショートカット)を追加" onClick={() => setTemplateEditor("new")} type="button">
-            <Plus aria-hidden size={20} />
-          </button>
+          <div className="settings-heading-actions">
+            <button className="sort-open-button" onClick={() => setOrderEditor("templates")} type="button">並べ替え</button>
+            <button className="tiny-icon-button add" aria-label="よく使う入力(ショートカット)を追加" onClick={() => setTemplateEditor("new")} type="button">
+              <Plus aria-hidden size={20} />
+            </button>
+          </div>
         </div>
         <div className="template-card-scroll">
-          {templateOrder.map((template, index) => (
-            <div className="sortable-template" key={template.id}>
-              <div className="sort-controls">
-                <button className="sort-nudge" aria-label={`${template.label}を左へ移動`} disabled={index === 0} onClick={() => setTemplateOrder(moveItem(templateOrder, index, index - 1))} type="button">
-                  <ChevronLeft aria-hidden size={16} />
-                </button>
-                <button className="sort-nudge" aria-label={`${template.label}を右へ移動`} disabled={index === templateOrder.length - 1} onClick={() => setTemplateOrder(moveItem(templateOrder, index, index + 1))} type="button">
-                  <ChevronRight aria-hidden size={16} />
-                </button>
-              </div>
-              <button className="template-summary-card" onClick={() => setTemplateEditor(template)} type="button">
-                <strong>{template.label}</strong>
-                <small>{template.amount > 0 ? formatYen(template.amount) : "金額なし"}</small>
-                <span>{template.memo || "内容なし"}</span>
-              </button>
-            </div>
+          {templates.map((template) => (
+            <button className="template-summary-card" key={template.id} onClick={() => setTemplateEditor(template)} type="button">
+              <strong>{template.label}</strong>
+              <small>{template.amount > 0 ? formatYen(template.amount) : "金額なし"}</small>
+              <span>{template.memo || "内容なし"}</span>
+            </button>
           ))}
         </div>
-        <form action={templateOrderAction} className="sort-save-form">
-          <input name="household_id" type="hidden" value={householdId} />
-          <input name="base_path" type="hidden" value={basePath} />
-          {templateOrder.map((template) => (
-            <input key={template.id} name="template_order" type="hidden" value={template.id} />
-          ))}
-          <button className="sort-save-button" type="submit">並び順を保存</button>
-        </form>
       </section>
+
+      {orderEditor === "categories" ? (
+        <SettingsModal title="カテゴリー並べ替え" onClose={() => {
+          setCategoryOrder(categories);
+          setOrderEditor(null);
+        }}>
+          <form action={categoryOrderAction} className="settings-form">
+            <input name="household_id" type="hidden" value={householdId} />
+            <input name="base_path" type="hidden" value={basePath} />
+            <div className="reorder-list">
+              {categoryOrder.map((category) => (
+                <div
+                  className={draggingCategoryId === category.id ? "reorder-row dragging" : "reorder-row"}
+                  key={category.id}
+                  ref={(node) => setRowRef(categoryRowRefs.current, category.id, node)}
+                >
+                  <span>{category.name}</span>
+                  <button
+                    className="drag-handle"
+                    aria-label={`${category.name}を並べ替え`}
+                    onPointerDown={(event) => {
+                      event.currentTarget.setPointerCapture(event.pointerId);
+                      setDraggingCategoryId(category.id);
+                    }}
+                    onPointerMove={(event) => {
+                      if (!draggingCategoryId) return;
+                      event.preventDefault();
+                      setCategoryOrder((current) => reorderByPointer(current, draggingCategoryId, event.clientY, categoryRowRefs.current));
+                    }}
+                    onPointerUp={() => setDraggingCategoryId("")}
+                    type="button"
+                  >
+                    <GripVertical aria-hidden size={22} />
+                  </button>
+                  <input name="category_order" type="hidden" value={category.id} />
+                </div>
+              ))}
+            </div>
+            <SaveButton label="決定" />
+          </form>
+        </SettingsModal>
+      ) : null}
+
+      {orderEditor === "templates" ? (
+        <SettingsModal title="ショートカット並べ替え" onClose={() => {
+          setTemplateOrder(templates);
+          setOrderEditor(null);
+        }}>
+          <form action={templateOrderAction} className="settings-form">
+            <input name="household_id" type="hidden" value={householdId} />
+            <input name="base_path" type="hidden" value={basePath} />
+            <div className="reorder-list">
+              {templateOrder.map((template) => (
+                <div
+                  className={draggingTemplateId === template.id ? "reorder-row dragging" : "reorder-row"}
+                  key={template.id}
+                  ref={(node) => setRowRef(templateRowRefs.current, template.id, node)}
+                >
+                  <span>{template.label}</span>
+                  <button
+                    className="drag-handle"
+                    aria-label={`${template.label}を並べ替え`}
+                    onPointerDown={(event) => {
+                      event.currentTarget.setPointerCapture(event.pointerId);
+                      setDraggingTemplateId(template.id);
+                    }}
+                    onPointerMove={(event) => {
+                      if (!draggingTemplateId) return;
+                      event.preventDefault();
+                      setTemplateOrder((current) => reorderByPointer(current, draggingTemplateId, event.clientY, templateRowRefs.current));
+                    }}
+                    onPointerUp={() => setDraggingTemplateId("")}
+                    type="button"
+                  >
+                    <GripVertical aria-hidden size={22} />
+                  </button>
+                  <input name="template_order" type="hidden" value={template.id} />
+                </div>
+              ))}
+            </div>
+            <SaveButton label="決定" />
+          </form>
+        </SettingsModal>
+      ) : null}
 
       {householdEditorOpen ? (
         <SettingsModal title="領域名" onClose={() => setHouseholdEditorOpen(false)}>
@@ -431,8 +496,21 @@ function limitNumberInput(event: React.FormEvent<HTMLInputElement>, maxDigits: n
   if (target.value !== digits) target.value = digits;
 }
 
-function moveItem<T>(items: T[], from: number, to: number) {
-  if (to < 0 || to >= items.length) return items;
+function setRowRef(refs: Map<string, HTMLDivElement>, id: string, node: HTMLDivElement | null) {
+  if (node) refs.set(id, node);
+  else refs.delete(id);
+}
+
+function reorderByPointer<T extends { id: string }>(items: T[], activeId: string, clientY: number, refs: Map<string, HTMLDivElement>) {
+  const from = items.findIndex((item) => item.id === activeId);
+  if (from < 0) return items;
+  const to = items.findIndex((item) => {
+    if (item.id === activeId) return false;
+    const rect = refs.get(item.id)?.getBoundingClientRect();
+    if (!rect) return false;
+    return clientY >= rect.top && clientY <= rect.bottom;
+  });
+  if (to < 0 || to === from) return items;
   const next = [...items];
   const [item] = next.splice(from, 1);
   next.splice(to, 0, item);
@@ -463,11 +541,11 @@ function SettingsModal({
   );
 }
 
-function SaveButton() {
+function SaveButton({ label = "保存" }: { label?: string }) {
   return (
     <button className="icon-text primary settings-submit" type="submit">
       <Save aria-hidden size={18} />
-      保存
+      {label}
     </button>
   );
 }

@@ -356,6 +356,13 @@ h2 {
   margin-bottom: 12px;
 }
 
+.settings-heading-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
 .settings-heading h2 {
   margin-bottom: 0;
 }
@@ -453,64 +460,53 @@ h2 {
   font-weight: 800;
 }
 
-.sortable-item,
-.sortable-template {
-  flex: 0 0 auto;
-}
-
-.sortable-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.sortable-template {
-  width: 148px;
-  display: grid;
-  gap: 6px;
-}
-
-.sort-controls {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-}
-
-.sort-nudge {
-  width: 30px;
-  height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(23, 32, 27, 0.1);
-  border-radius: 999px;
-  background: white;
-  color: #17201b;
-}
-
-.sortable-template .sort-nudge {
-  width: 100%;
-}
-
-.sort-nudge:disabled {
-  opacity: 0.35;
-}
-
-.sort-save-form {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 10px;
-}
-
-.sort-save-button {
-  min-height: 36px;
+.sort-open-button {
+  min-height: 38px;
   border: 0;
   border-radius: 999px;
   background: #eef4ef;
   color: #17201b;
-  padding: 0 14px;
+  padding: 0 13px;
   font-size: 0.82rem;
   font-weight: 900;
+}
+
+.reorder-list {
+  display: grid;
+}
+
+.reorder-row {
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 2px dashed rgba(122, 58, 43, 0.45);
+  color: #17201b;
+  font-weight: 900;
+}
+
+.reorder-row.dragging {
+  opacity: 0.55;
+  background: rgba(238, 244, 239, 0.8);
+}
+
+.drag-handle {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(23, 32, 27, 0.42);
+  cursor: grab;
+  touch-action: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
 }
 
 .mini-row span {
