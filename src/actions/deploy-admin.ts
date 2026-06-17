@@ -5,11 +5,19 @@ import { redirect } from "next/navigation";
 
 const adminCookieName = "kakeibo_deploy_admin";
 
+function getDeployAdminCredentials() {
+  return {
+    id: process.env.DEPLOY_ADMIN_ID?.trim() ?? "",
+    password: process.env.DEPLOY_ADMIN_PASSWORD ?? ""
+  };
+}
+
 export async function loginDeployAdmin(formData: FormData) {
   const id = String(formData.get("admin_id") ?? "");
   const password = String(formData.get("admin_password") ?? "");
+  const admin = getDeployAdminCredentials();
 
-  if (id !== "admin" || password !== "0000") {
+  if (!admin.id || !admin.password || id !== admin.id || password !== admin.password) {
     redirect("/deploy/admin?error=auth");
   }
 
