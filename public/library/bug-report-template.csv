@@ -1,0 +1,2 @@
+title,severity,area,steps,expected,actual,cause,fix,status
+"カテゴリー削除後に表示が残る","高","/tanaka/settings","1. カテゴリーを削除する","履歴とショートカットが未分類になる","削除後も旧カテゴリー名が表示される","削除後の再取得またはキャッシュ更新不足","削除後に関連パスを再検証する","未対応"

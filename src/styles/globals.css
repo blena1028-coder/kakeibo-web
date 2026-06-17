@@ -488,6 +488,71 @@ h2 {
   font-weight: 900;
 }
 
+.library-section {
+  display: grid;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.library-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.library-card {
+  display: grid;
+  gap: 6px;
+  min-height: 96px;
+  border: 1px solid rgba(23, 32, 27, 0.08);
+  border-radius: 8px;
+  background: #f8f7f2;
+  color: #17201b;
+  padding: 14px;
+  text-decoration: none;
+}
+
+.library-card strong {
+  font-size: 0.98rem;
+}
+
+.library-card span {
+  color: rgba(23, 32, 27, 0.66);
+  font-size: 0.84rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.bug-report-form textarea {
+  resize: vertical;
+}
+
+.bug-report-title {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bug-report-title span {
+  border-radius: 999px;
+  background: #eef4ef;
+  color: #496f5d;
+  padding: 5px 9px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.bug-report-row p {
+  color: rgba(23, 32, 27, 0.74);
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.55;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
 .category-pill {
   flex: 0 0 auto;
   min-width: 72px;

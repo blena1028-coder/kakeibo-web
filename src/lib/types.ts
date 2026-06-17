@@ -61,6 +61,21 @@ export type User = {
   updated_at: string;
 };
 
+export type BugReport = {
+  id: string;
+  title: string;
+  severity: string;
+  area: string;
+  steps: string;
+  expected: string;
+  actual: string;
+  cause: string;
+  fix: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type MemberNameMap = Record<MemberId, string>;
 
 export type TransactionFormState = {

@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
-import type { Category, Household, HouseholdMember, MemberId, QuickTemplate, Transaction, User } from "@/lib/types";
+import type { BugReport, Category, Household, HouseholdMember, MemberId, QuickTemplate, Transaction, User } from "@/lib/types";
 
 const dataDir = path.join(process.cwd(), "data");
 
@@ -12,7 +12,8 @@ const files = {
   quickTemplates: "quick_templates.csv",
   households: "households.csv",
   householdMembers: "household_members.csv",
-  users: "users.csv"
+  users: "users.csv",
+  bugReports: "bug_reports.csv"
 };
 
 function parseCsv(text: string): Row[] {
@@ -268,6 +269,34 @@ export async function writeUsers(users: User[]) {
     files.users,
     ["id", "display_name", "email", "created_at", "updated_at"],
     users.map((user) => ({ ...user }))
+  );
+}
+
+export async function readBugReports(): Promise<BugReport[]> {
+  const rows = await readRows(files.bugReports);
+  return rows
+    .map((row) => ({
+      id: row.id,
+      title: row.title,
+      severity: row.severity,
+      area: row.area,
+      steps: row.steps,
+      expected: row.expected,
+      actual: row.actual,
+      cause: row.cause,
+      fix: row.fix,
+      status: row.status,
+      created_at: row.created_at,
+      updated_at: row.updated_at
+    }))
+    .sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+}
+
+export async function writeBugReports(reports: BugReport[]) {
+  await writeRows(
+    files.bugReports,
+    ["id", "title", "severity", "area", "steps", "expected", "actual", "cause", "fix", "status", "created_at", "updated_at"],
+    reports.map((report) => ({ ...report }))
   );
 }
 
