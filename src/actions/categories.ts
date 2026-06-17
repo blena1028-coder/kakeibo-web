@@ -5,6 +5,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import {
   readCategories,
+  readMonthlyClosings,
   readQuickTemplates,
   readTransactions,
   writeCategories,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/csv";
 import { defaultHouseholdId } from "@/lib/households";
 import { createId } from "@/lib/ids";
+import { isMonthClosed } from "@/lib/settlement";
 import type { SettingsActionState } from "@/lib/types";
 
 function actionScope(formData: FormData) {
@@ -36,7 +38,10 @@ export async function exportCsvFile(formData: FormData) {
     "quick_templates.csv",
     "households.csv",
     "household_members.csv",
-    "users.csv"
+    "users.csv",
+    "monthly_closings.csv",
+    "monthly_adjustments.csv",
+    "bug_reports.csv"
   ]);
 
   if (!allowed.has(fileName)) return "";
@@ -113,10 +118,11 @@ export async function deleteCategory(
   const { householdId, basePath } = actionScope(formData);
 
   const now = new Date().toISOString();
-  const [categories, templates, transactions] = await Promise.all([
+  const [categories, templates, transactions, closings] = await Promise.all([
     readCategories(householdId),
     readQuickTemplates(householdId),
-    readTransactions(householdId)
+    readTransactions(householdId),
+    readMonthlyClosings(householdId)
   ]);
 
   await Promise.all([
@@ -129,7 +135,9 @@ export async function deleteCategory(
     ),
     writeTransactions(
       transactions.map((tx) =>
-        tx.category_id === id ? { ...tx, category_id: "", updated_at: now } : tx
+        tx.category_id === id && !isMonthClosed(tx.date.slice(0, 7), closings)
+          ? { ...tx, category_id: "", updated_at: now }
+          : tx
       ),
       householdId
     )

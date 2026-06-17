@@ -60,7 +60,7 @@ export function HomeClient({ categories, memberNames, templates, transactions, s
       </section>
 
       <section className="settlement-band">
-        <span>精算目安</span>
+        <span>精算額</span>
         <strong>{settlement.settlementText}</strong>
       </section>
 

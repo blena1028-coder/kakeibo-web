@@ -1,16 +1,17 @@
-import { readCategories, readHouseholdMembers, readTransactions } from "@/lib/csv";
-import { formatYen } from "@/lib/date";
+import { readCategories, readHouseholdMembers, readMonthlyAdjustments, readTransactions } from "@/lib/csv";
+import { currentMonthKey, formatYen } from "@/lib/date";
 import { defaultHouseholdId } from "@/lib/households";
 import { buildMemberNameMap } from "@/lib/members";
-import { calculateSettlement } from "@/lib/settlement";
+import { calculateSettlement, filterAdjustmentsThisMonth, filterThisMonth } from "@/lib/settlement";
 
 export const dynamic = "force-dynamic";
 
 export default async function AnalyticsPage() {
-  const [transactions, categories, members] = await Promise.all([
+  const [transactions, categories, members, adjustments] = await Promise.all([
     readTransactions(defaultHouseholdId),
     readCategories(defaultHouseholdId),
-    readHouseholdMembers(defaultHouseholdId)
+    readHouseholdMembers(defaultHouseholdId),
+    readMonthlyAdjustments(defaultHouseholdId)
   ]);
   const memberNames = buildMemberNameMap(members);
   const byMonth = new Map<string, number>();
@@ -22,7 +23,12 @@ export default async function AnalyticsPage() {
     byCategory.set(tx.category_id || "uncategorized", (byCategory.get(tx.category_id || "uncategorized") ?? 0) + tx.amount);
   }
 
-  const settlement = calculateSettlement(transactions, memberNames);
+  const monthKey = currentMonthKey();
+  const settlement = calculateSettlement(
+    filterThisMonth(transactions, monthKey),
+    memberNames,
+    filterAdjustmentsThisMonth(adjustments, monthKey)
+  );
   const categoryName = (id: string) => categories.find((category) => category.id === id)?.name ?? "未分類";
 
   return (
@@ -68,7 +74,7 @@ export default async function AnalyticsPage() {
       </section>
 
       <section className="settlement-band">
-        <span>精算目安</span>
+        <span>精算額</span>
         <strong>{settlement.settlementText}</strong>
       </section>
     </main>

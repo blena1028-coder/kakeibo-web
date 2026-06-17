@@ -379,7 +379,7 @@ export function SettingsClient({ categories, categoryUsage, memberNames, templat
               このカテゴリーは履歴またはよく使う入力(ショートカット)で使われています。
             </p>
             <p className="warning-text">
-              削除すると該当データはすべて未分類になります。元に戻せません。
+              削除すると未締めの履歴とショートカットは未分類になります。締め済み履歴のデータは変更しません。
             </p>
             <div className="settings-action-row">
               <button className="icon-text danger settings-delete" type="submit">

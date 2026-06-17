@@ -2,6 +2,12 @@ export function currentMonthKey(date = new Date()) {
   return todayInputValue(date).slice(0, 7);
 }
 
+export function nextMonthKey(monthKey: string) {
+  const [year, month] = monthKey.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month, 1));
+  return date.toISOString().slice(0, 7);
+}
+
 export function todayInputValue(date = new Date()) {
   return new Intl.DateTimeFormat("sv-SE", {
     timeZone: "Asia/Tokyo",

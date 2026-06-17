@@ -1,23 +1,25 @@
 import { HomeClient } from "@/components/home-client";
-import { readCategories, readHouseholdMembers, readHouseholds, readQuickTemplates, readTransactions } from "@/lib/csv";
+import { readCategories, readHouseholdMembers, readHouseholds, readMonthlyAdjustments, readQuickTemplates, readTransactions } from "@/lib/csv";
 import { currentMonthKey } from "@/lib/date";
 import { defaultHouseholdId, householdBasePath, householdNameOrSlug, householdTitle } from "@/lib/households";
 import { buildMemberNameMap } from "@/lib/members";
-import { calculateSettlement, filterThisMonth } from "@/lib/settlement";
+import { calculateSettlement, filterAdjustmentsThisMonth, filterThisMonth } from "@/lib/settlement";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [transactions, categories, templates, members, households] = await Promise.all([
+  const [transactions, categories, templates, members, households, adjustments] = await Promise.all([
     readTransactions(defaultHouseholdId),
     readCategories(defaultHouseholdId),
     readQuickTemplates(defaultHouseholdId),
     readHouseholdMembers(defaultHouseholdId),
-    readHouseholds()
+    readHouseholds(),
+    readMonthlyAdjustments(defaultHouseholdId)
   ]);
   const memberNames = buildMemberNameMap(members);
-  const monthTransactions = filterThisMonth(transactions, currentMonthKey());
-  const settlement = calculateSettlement(monthTransactions, memberNames);
+  const monthKey = currentMonthKey();
+  const monthTransactions = filterThisMonth(transactions, monthKey);
+  const settlement = calculateSettlement(monthTransactions, memberNames, filterAdjustmentsThisMonth(adjustments, monthKey));
   const household = households.find((item) => item.id === defaultHouseholdId);
   const title = householdTitle(householdNameOrSlug(defaultHouseholdId, household?.name));
 

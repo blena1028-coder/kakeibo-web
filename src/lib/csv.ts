@@ -1,6 +1,18 @@
 import { promises as fs } from "fs";
 import path from "path";
-import type { BugReport, Category, Household, HouseholdMember, MemberId, QuickTemplate, Transaction, User } from "@/lib/types";
+import type {
+  BugReport,
+  Category,
+  Household,
+  HouseholdMember,
+  MemberId,
+  MonthlyAdjustment,
+  MonthlyAdjustmentKind,
+  MonthlyClosing,
+  QuickTemplate,
+  Transaction,
+  User
+} from "@/lib/types";
 
 const dataDir = path.join(process.cwd(), "data");
 
@@ -13,7 +25,9 @@ const files = {
   households: "households.csv",
   householdMembers: "household_members.csv",
   users: "users.csv",
-  bugReports: "bug_reports.csv"
+  bugReports: "bug_reports.csv",
+  monthlyClosings: "monthly_closings.csv",
+  monthlyAdjustments: "monthly_adjustments.csv"
 };
 
 function parseCsv(text: string): Row[] {
@@ -78,7 +92,13 @@ function stringifyCsv(headers: string[], rows: Row[]) {
 }
 
 async function readRows(fileName: string) {
-  const text = await fs.readFile(path.join(dataDir, fileName), "utf8");
+  let text = "";
+  try {
+    text = await fs.readFile(path.join(dataDir, fileName), "utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+    throw error;
+  }
   return parseCsv(text);
 }
 
@@ -98,6 +118,10 @@ function parsePayers(value: string): MemberId[] {
 
 function parseMember(value: string): MemberId {
   return value === "B" ? "B" : "A";
+}
+
+function parseAdjustmentKind(value: string): MonthlyAdjustmentKind {
+  return value === "payment" ? "payment" : "carryover";
 }
 
 export async function readTransactions(householdId?: string): Promise<Transaction[]> {
@@ -297,6 +321,76 @@ export async function writeBugReports(reports: BugReport[]) {
     files.bugReports,
     ["id", "title", "severity", "area", "steps", "expected", "actual", "cause", "fix", "status", "created_at", "updated_at"],
     reports.map((report) => ({ ...report }))
+  );
+}
+
+export async function readMonthlyClosings(householdId?: string): Promise<MonthlyClosing[]> {
+  const rows = await readRows(files.monthlyClosings);
+  return rows
+    .filter((row) => !householdId || row.household_id === householdId)
+    .map((row) => ({
+      id: row.id,
+      household_id: row.household_id,
+      month: row.month,
+      carryover_month: row.carryover_month,
+      carryover_amount: Number(row.carryover_amount),
+      created_at: row.created_at,
+      updated_at: row.updated_at
+    }))
+    .sort((a, b) => b.month.localeCompare(a.month));
+}
+
+export async function writeMonthlyClosings(closings: MonthlyClosing[], householdId?: string) {
+  const nextClosings = householdId
+    ? [
+        ...(await readMonthlyClosings()).filter((closing) => closing.household_id !== householdId),
+        ...closings
+      ]
+    : closings;
+  await writeRows(
+    files.monthlyClosings,
+    ["id", "household_id", "month", "carryover_month", "carryover_amount", "created_at", "updated_at"],
+    nextClosings.map((closing) => ({
+      ...closing,
+      carryover_amount: String(closing.carryover_amount)
+    }))
+  );
+}
+
+export async function readMonthlyAdjustments(householdId?: string): Promise<MonthlyAdjustment[]> {
+  const rows = await readRows(files.monthlyAdjustments);
+  return rows
+    .filter((row) => !householdId || row.household_id === householdId)
+    .map((row) => ({
+      id: row.id,
+      household_id: row.household_id,
+      month: row.month,
+      kind: parseAdjustmentKind(row.kind),
+      source_month: row.source_month,
+      amount_signed: Number(row.amount_signed),
+      from_member: parseMember(row.from_member),
+      to_member: parseMember(row.to_member),
+      memo: row.memo,
+      created_at: row.created_at,
+      updated_at: row.updated_at
+    }))
+    .sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+}
+
+export async function writeMonthlyAdjustments(adjustments: MonthlyAdjustment[], householdId?: string) {
+  const nextAdjustments = householdId
+    ? [
+        ...(await readMonthlyAdjustments()).filter((adjustment) => adjustment.household_id !== householdId),
+        ...adjustments
+      ]
+    : adjustments;
+  await writeRows(
+    files.monthlyAdjustments,
+    ["id", "household_id", "month", "kind", "source_month", "amount_signed", "from_member", "to_member", "memo", "created_at", "updated_at"],
+    nextAdjustments.map((adjustment) => ({
+      ...adjustment,
+      amount_signed: String(adjustment.amount_signed)
+    }))
   );
 }
 

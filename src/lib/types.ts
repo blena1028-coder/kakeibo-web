@@ -76,6 +76,32 @@ export type BugReport = {
   updated_at: string;
 };
 
+export type MonthlyClosing = {
+  id: string;
+  household_id: string;
+  month: string;
+  carryover_month: string;
+  carryover_amount: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type MonthlyAdjustmentKind = "carryover" | "payment";
+
+export type MonthlyAdjustment = {
+  id: string;
+  household_id: string;
+  month: string;
+  kind: MonthlyAdjustmentKind;
+  source_month: string;
+  amount_signed: number;
+  from_member: MemberId;
+  to_member: MemberId;
+  memo: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type MemberNameMap = Record<MemberId, string>;
 
 export type TransactionFormState = {
@@ -95,5 +121,9 @@ export type Settlement = {
   bBurden: number;
   difference: number;
   settlementAmount: number;
+  settlementFloor: number;
+  remainderYen: number;
   settlementText: string;
+  fromMember?: MemberId;
+  toMember?: MemberId;
 };
